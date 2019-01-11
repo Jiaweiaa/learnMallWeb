@@ -76,7 +76,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-2">
-                  <div class="item-price">{{item.salePrice}}</div>
+                  <div class="item-price">{{item.salePrice |  currency('¥')}}</div>
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
@@ -90,7 +90,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-4">
-                  <div class="item-price-total">{{item.salePrice * item.productNum}}</div>
+                  <div class="item-price-total">{{(item.salePrice * item.productNum )| currency('¥')}}</div>
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
@@ -109,8 +109,8 @@
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
               <div class="item-all-check">
-                <a href="javascipt:;">
-                  <span class="checkbox-btn item-check-btn">
+                <a href="javascipt:;" @click="toggleCheckAll">
+                  <span class="checkbox-btn item-check-btn"  :class="{'check': checkAllFlag}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
                   <span>Select all</span>
@@ -119,10 +119,10 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">500</span>
+                Item total: <span class="total-price">{{totalPrice | currency('¥')}}</span>
               </div>
               <div class="btn-wrap">
-                <a class="btn btn--red">Checkout</a>
+                <a class="btn btn--red" :class="{'btn--dis': checkedCount == 0}" @click="Checkout">Checkout</a>
               </div>
             </div>
           </div>
@@ -145,11 +145,13 @@
   import NavFooter from './NavFooter';
   import Modal from './../components/Modal';
   import axios from 'axios';
+  import { currency } from "./../util/currency";
+
 
   export default{
     data(){
       return{
-        dataList: '',
+        dataList: [],
         mdShowConfirm: false,
         productId: ''
       }
@@ -160,8 +162,35 @@
       NavBread,
       NavFooter
     },
+    filters: {
+      currency
+    },
     created() {
       this.getCartList();
+    },
+    computed: {
+      // 实际计算全选问题
+      checkAllFlag() {
+        return this.checkedCount == this.dataList.length;
+      },
+      checkedCount() {
+        let i = 0;
+        this.dataList.forEach((item) => {
+          if(item.checked == '1') i++;
+        });
+        return i;
+      },
+
+      // 实时计算总价 这个计算跟data注册一个性质
+      totalPrice() {
+        let money = 0;
+        this.dataList.forEach((item) => {
+          if(item.checked == 1) {
+            money += item.salePrice * item.productNum;
+          }
+        })
+        return money;
+      }
     },
     methods: {
       // 点击删除操作
@@ -226,6 +255,32 @@
             alert(res.data.msg)
           }
         })
+      },
+      // 全选功能
+      toggleCheckAll() {
+        let flag = !this.checkAllFlag;
+        this.dataList.forEach((item) => {
+          item.checked = flag ? '1': '0';
+        });
+
+        axios.post("/users/cardCheckAll", {
+          checkAll: flag
+        }).then((res) => {
+          if(res.data.status == 0) {
+          }else {
+            alert(res.data.msg)
+          }
+        })
+      },
+
+      // 结账
+      Checkout() {
+        console.log(this.checkedCount)
+        if(this.checkedCount > 0) {
+          this.$router.push({
+            path: '/address'
+          })
+        }
       }
     }
   }

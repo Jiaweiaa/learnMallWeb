@@ -118,7 +118,6 @@
             this.errorTip = false;
             this.loginModalFlag = false;
             this.nickName = res.result.userName;
-            console.log(res)
           }else {
             this.errorTip = true;
           }
