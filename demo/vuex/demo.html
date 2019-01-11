@@ -2,18 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>state</title>
     <script src="./../../node_modules/vue/dist/vue.js"></script>
     <script src="./../../node_modules/vuex/dist/vuex.min.js"></script>
 </head>
 <body>
   <div id="app">
     <h2>{{msg}}</h2>
+    <counter :count="count"></counter>
   </div>
   <script>
+    const counter = {
+      template: `
+        <div>{{count}}</div>
+      `,
+      computed: {
+        count() {
+          return this.$store.state.count;
+        }
+      }
+    };
     const storeVue = new Vuex.Store({
       state: {
-        num: 0
+        count: 10
       }
     })
     new Vue({
@@ -21,6 +32,9 @@
       store: storeVue,
       data: {
         msg: 'vueX'
+      },
+      components: {
+        counter
       }
     })
   </script>
