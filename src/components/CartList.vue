@@ -94,7 +94,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a href="javascript:;" @click="delConfirm(item.productId)" class="item-edit-btn">
+                    <a href="javascript:;" @click="delConfirm(item.productId, item.productNum)" class="item-edit-btn">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -153,7 +153,8 @@
       return{
         dataList: [],
         mdShowConfirm: false,
-        productId: ''
+        productId: '',
+        stateNumChange: ''
       }
     },
     components: {
@@ -194,9 +195,10 @@
     },
     methods: {
       // 点击删除操作
-      delConfirm(id) {
+      delConfirm(id, num) {
         this.productId = id;
         this.mdShowConfirm = true;
+        this.stateNumChange = num;
       },
       // 关闭模态框
       closeModal() {
@@ -212,6 +214,7 @@
           if(res.data.status == 0) {
             this.mdShowConfirm = false;
             this.getCartList();
+            this.$store.commit("updateCartCount", -this.stateNumChange)
           }else {
             alert(res.data.msg)
           }
@@ -235,10 +238,12 @@
           if(item.productNum <= 1) {
             return;
           }
+          this.$store.commit("updateCartCount", -1)
           item.productNum--;
         }
         // 加
         else if(type == 1){
+          this.$store.commit("updateCartCount", 1)
           item.productNum++;
         }else {
           item.checked == 1 ? item.checked = 0 : item.checked = 1;
